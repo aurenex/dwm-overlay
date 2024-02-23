@@ -11,6 +11,8 @@ Subscribe to my Telegram [channel][tg-channel-link] or make a donation if you wa
 
 ### Bugs
 - Duplicating an overlay in an area that is not updating.
+- The overlay disappears after reconnecting the monitor.
+- Debug version causes the system to freeze.
 
 ### Compilation
 - Clone this repository.
