@@ -172,7 +172,7 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 
 	MSG message {};
 
-	while (GetMessageW(&message, 0, 0, 0) > 0)
+	while (GetMessageW(&message, GetDesktopWindow(), 0, 0) > 0)
 	{
 		TranslateMessage(&message);
 		DispatchMessageW(&message);
