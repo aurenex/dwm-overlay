@@ -191,7 +191,7 @@ BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD reason, LPVOID lpReserved)
 		break;
 
 		case DLL_PROCESS_DETACH:
-			MH_DisableHook(MH_ALL_HOOKS);
+			MH_Uninitialize();
 	}
 
 	return TRUE;
