@@ -15,7 +15,8 @@
 #include "imgui/backends/imgui_impl_win32.h"
 #include "imgui/backends/imgui_impl_dx11.h"
 
-LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler
+	(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 decltype(&PresentDWM) fn_PresentDWM = nullptr;
 decltype(&PresentMultiplaneOverlay) fn_PresentMultiplaneOverlay = nullptr;
@@ -208,12 +209,12 @@ BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD reason, LPVOID lpReserved)
 {
 	switch (reason)
 	{
-		case DLL_PROCESS_ATTACH:
-			CreateThread(nullptr, 0, &MainThread, nullptr, 0, nullptr);
-		break;
+	case DLL_PROCESS_ATTACH:
+		CreateThread(nullptr, 0, &MainThread, nullptr, 0, nullptr);
+	break;
 
-		case DLL_PROCESS_DETACH:
-			MH_DisableHook(MH_ALL_HOOKS);
+	case DLL_PROCESS_DETACH:
+		MH_DisableHook(MH_ALL_HOOKS);
 	}
 
 	return TRUE;
