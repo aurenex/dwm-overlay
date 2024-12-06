@@ -106,12 +106,26 @@ HRESULT STDMETHODCALLTYPE hk_PresentMultiplaneOverlay
 		pOverlays);
 }
 
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	const KBDLLHOOKSTRUCT* hookStruct = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+	const ImGuiIO& io = ImGui::GetIO();
+
+	ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), 
+		static_cast<UINT>(wParam), hookStruct->vkCode, hookStruct->scanCode);
+
+	if (io.WantCaptureKeyboard)
+		return -1;
+
+	return CallNextHookEx(nullptr, nCode, wParam, lParam);
+}
+
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	const MSLLHOOKSTRUCT* hookStruct = reinterpret_cast<MSLLHOOKSTRUCT*>(lParam);
 	const ImGuiIO& io = ImGui::GetIO();
 
-	ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), wParam,
+	ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), static_cast<UINT>(wParam),
 		hookStruct->flags, MAKELPARAM(hookStruct->pt.x, hookStruct->pt.y));
 
 	if (io.WantCaptureMouse and wParam != WM_MOUSEMOVE)
@@ -188,9 +202,11 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 	if (MH_EnableHook(MH_ALL_HOOKS))
 		return EXIT_FAILURE;
 
-	const HHOOK hHook = SetWindowsHookExW(WH_MOUSE_LL, &LowLevelMouseProc, nullptr, 0);
+	const HHOOK hMouseHook = SetWindowsHookExW(WH_MOUSE_LL, &LowLevelMouseProc, nullptr, 0);
+	const HHOOK hKeyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, &LowLevelKeyboardProc, nullptr, 0);
 
-	if (!hHook)
+	// TODO: Add UnhookWindowsHookEx
+	if (!hMouseHook or !hKeyboardHook)
 		return EXIT_FAILURE;
 
 	MSG message {};
@@ -201,7 +217,9 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 		DispatchMessageW(&message);
 	}
 
-	UnhookWindowsHookEx(hHook);
+	UnhookWindowsHookEx(hMouseHook);
+	UnhookWindowsHookEx(hKeyboardHook);
+
 	return EXIT_SUCCESS;
 }
 
