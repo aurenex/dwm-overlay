@@ -9,7 +9,7 @@
 
 #include "dxgi/undocumented.h"
 
-#include "minhook/include/MinHook.h"
+#include "minhook/include/minhook.h"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_win32.h"
@@ -55,36 +55,54 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
-long __cdecl hk_PresentDWM
+HRESULT STDMETHODCALLTYPE hk_PresentDWM
 (
 	IDXGISwapChainDWMLegacy* pSwapChain,
-	unsigned int a1,
-	unsigned int a2,
-	unsigned int a3,
-	struct tagRECT const* a4,
-	unsigned int a5,
-	struct DXGI_SCROLL_RECT const* a6,
-	struct IDXGIResource* a7,
-	unsigned int a8
+	UINT SyncInterval,
+	UINT PresentFlags,
+	UINT DirtyRectsCount,
+	const RECT* pDirtyRects,
+	UINT ScrollRectsCount,
+	const RECT* pScrollRects,
+	IDXGIResource* pResource,
+	UINT FrameIndex // I'm not sure about the name of this variable
 )
 {
 	draw(pSwapChain);
-	return fn_PresentDWM(pSwapChain, a1, a2, a3, a4, a5, a6, a7, a8);
+
+	return fn_PresentDWM(
+		pSwapChain,
+		SyncInterval,
+		PresentFlags,
+		DirtyRectsCount,
+		pDirtyRects,
+		ScrollRectsCount,
+		pScrollRects,
+		pResource,
+		FrameIndex);
 }
 
-long __cdecl hk_PresentMultiplaneOverlay
+HRESULT STDMETHODCALLTYPE hk_PresentMultiplaneOverlay
 (
 	IDXGISwapChainDWMLegacy* pSwapChain,
-	unsigned int a1,
-	unsigned int a2,
-	enum DXGI_HDR_METADATA_TYPE a3,
-	void const* a4,
-	unsigned int a5,
-	struct _DXGI_PRESENT_MULTIPLANE_OVERLAY const* a6
+	UINT SyncInterval,
+	UINT PresentFlags,
+	enum DXGI_HDR_METADATA_TYPE MetadataType,
+	const void* pMetadata,
+	UINT OverlayCount,
+	const struct _DXGI_PRESENT_MULTIPLANE_OVERLAY* pOverlays
 )
 {
 	draw(pSwapChain);
-	return fn_PresentMultiplaneOverlay(pSwapChain, a1, a2, a3, a4, a5, a6);
+
+	return fn_PresentMultiplaneOverlay(
+		pSwapChain,
+		SyncInterval,
+		PresentFlags,
+		MetadataType,
+		pMetadata,
+		OverlayCount,
+		pOverlays);
 }
 
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
@@ -148,19 +166,23 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 	uintptr_t** pSwapChain = nullptr;
 	pFactoryDWM->CreateSwapChain(pDevice, &SwapChainDesc, pOutput, (IDXGISwapChainDWMLegacy**)&pSwapChain);
 
+	// Current offsets are supported on Windows 10 - 11
+	// Don't forget to update the offsets for your version
 	const uintptr_t fpPresentDWM = (*pSwapChain)[16];
 	const uintptr_t fpPresentMultiplaneOverlay = (*pSwapChain)[23];
 
 	fn_PresentDWM = reinterpret_cast
 		<decltype(fn_PresentDWM)>(fpPresentDWM);
+
 	fn_PresentMultiplaneOverlay = reinterpret_cast
 		<decltype(fn_PresentMultiplaneOverlay)>(fpPresentMultiplaneOverlay);
 
+	// You can use vtable hook instead of minhook
 	MH_Initialize();
 	MH_CreateHook(reinterpret_cast<void*>(fpPresentDWM),
-		hk_PresentDWM, reinterpret_cast<void**>(&fn_PresentDWM));
+		&hk_PresentDWM, reinterpret_cast<void**>(&fn_PresentDWM));
 	MH_CreateHook(reinterpret_cast<void*>(fpPresentMultiplaneOverlay),
-		hk_PresentMultiplaneOverlay, reinterpret_cast<void**>(&fn_PresentMultiplaneOverlay));
+		&hk_PresentMultiplaneOverlay, reinterpret_cast<void**>(&fn_PresentMultiplaneOverlay));
 
 	if (MH_EnableHook(MH_ALL_HOOKS))
 		return EXIT_FAILURE;
@@ -172,7 +194,7 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 
 	MSG message {};
 
-	while (GetMessageW(&message, 0, 0, 0) > 0)
+	while (GetMessageW(&message, nullptr, 0, 0) > 0)
 	{
 		TranslateMessage(&message);
 		DispatchMessageW(&message);

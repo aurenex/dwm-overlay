@@ -29,26 +29,26 @@ IDXGIFactoryDWM : public IUnknown
 	) = 0;
 };
 
-long __cdecl PresentDWM
+HRESULT STDMETHODCALLTYPE PresentDWM
 (
-	IDXGISwapChainDWMLegacy*,
-	unsigned int,
-	unsigned int,
-	unsigned int,
-	struct tagRECT const*,
-	unsigned int,
-	struct DXGI_SCROLL_RECT const*,
-	struct IDXGIResource*,
-	unsigned int
+	IDXGISwapChainDWMLegacy* pSwapChain,
+	UINT SyncInterval,
+	UINT PresentFlags,
+	UINT DirtyRectsCount,
+	const RECT* pDirtyRects,
+	UINT ScrollRectsCount,
+	const RECT* pScrollRects,
+	IDXGIResource* pResource,
+	UINT FrameIndex // I'm not sure about the name of this variable
 );
 
-long __cdecl PresentMultiplaneOverlay
+HRESULT STDMETHODCALLTYPE PresentMultiplaneOverlay
 (
-	IDXGISwapChainDWMLegacy*,
-	unsigned int,
-	unsigned int,
-	enum DXGI_HDR_METADATA_TYPE,
-	void const*,
-	unsigned int,
-	struct _DXGI_PRESENT_MULTIPLANE_OVERLAY const*
+	IDXGISwapChainDWMLegacy* pSwapChain,
+	UINT SyncInterval,
+	UINT PresentFlags,
+	enum DXGI_HDR_METADATA_TYPE MetadataType,
+	const void* pMetadata,
+	UINT OverlayCount,
+	const struct _DXGI_PRESENT_MULTIPLANE_OVERLAY* pOverlays
 );
