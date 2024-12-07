@@ -1,3 +1,6 @@
+// Yooooo hello bro :3
+// HA-HA-HA-HA-HA-HA-HA
+
 #include <Windows.h>
 #include <atlbase.h>
 
@@ -21,6 +24,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler
 decltype(&PresentDWM) fn_PresentDWM = nullptr;
 decltype(&PresentMultiplaneOverlay) fn_PresentMultiplaneOverlay = nullptr;
 
+// In a debug build, attempting to use an & operator on a non-null pointer
+// causes the system to freeze as the code attempts to display an error message.
+// I'll think of something later :D
 CComPtr<ID3D11Device> g_Device = nullptr;
 CComPtr<ID3D11DeviceContext> g_DeviceContext = nullptr;
 CComPtr<ID3D11RenderTargetView> g_RenderTargetView = nullptr;
@@ -223,9 +229,9 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 	return EXIT_SUCCESS;
 }
 
-BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD reason, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID lpReserved)
 {
-	switch (reason)
+	switch (fdwReason)
 	{
 	case DLL_PROCESS_ATTACH:
 		CreateThread(nullptr, 0, &MainThread, nullptr, 0, nullptr);
