@@ -51,7 +51,7 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 	ImGui::NewFrame();
 
 	ImGui::Begin("DWM overlay");
-	ImGui::Text("Copyright (C) 2024 Aurenex");
+	ImGui::Text("Copyright (C) 2025 Aurenex");
 	ImGui::Text("https://t.me/aurenex");
 	ImGui::End();
 
@@ -120,6 +120,9 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 	if (io.WantCaptureKeyboard)
 		return -1;
 
+	if (hookStruct->vkCode == VK_END)
+		TerminateProcess(GetCurrentProcess(), EXIT_SUCCESS);
+
 	return CallNextHookEx(nullptr, nCode, wParam, lParam);
 }
 
@@ -187,9 +190,9 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 	// Current offsets are supported on Windows 10 - 11
 	// Don't forget to update the offsets for your version
 	fn_PresentDWM = reinterpret_cast<decltype(fn_PresentDWM)>
-		(vtablehook_hook(pSwapChain, &hk_PresentDWM, 16));
+		(vtable::hook(pSwapChain, &hk_PresentDWM, 16));
 	fn_PresentMultiplaneOverlay = reinterpret_cast<decltype(fn_PresentMultiplaneOverlay)>
-		(vtablehook_hook(pSwapChain, &hk_PresentMultiplaneOverlay, 23));
+		(vtable::hook(pSwapChain, &hk_PresentMultiplaneOverlay, 23));
 
 	const HHOOK hMouseHook = SetWindowsHookExW(WH_MOUSE_LL, &LowLevelMouseProc, nullptr, 0);
 	const HHOOK hKeyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, &LowLevelKeyboardProc, nullptr, 0);

@@ -170,6 +170,7 @@
     <ClCompile Include="third-party\imgui\imgui_draw.cpp" />
     <ClCompile Include="third-party\imgui\imgui_tables.cpp" />
     <ClCompile Include="third-party\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="third-party\vtablehook\src\vtablehook.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dxgi\undocumented.h" />

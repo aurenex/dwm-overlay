@@ -36,6 +36,9 @@
     <ClCompile Include="third-party\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="third-party\vtablehook\src\vtablehook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dxgi\undocumented.h">
