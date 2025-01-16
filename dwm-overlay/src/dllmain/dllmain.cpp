@@ -42,7 +42,7 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 	}
 
 	// The shit &g_RenderTargetView.p fixes bug when system causes freeze in debug build
-	// Not normally spamming this every frame but idk how fix it
+	// It's not normal to spam this in every frame but idk how fix it
 	// I'll do better later :0
 	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView.p, nullptr);
 
