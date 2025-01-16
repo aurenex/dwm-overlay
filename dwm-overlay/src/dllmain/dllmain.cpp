@@ -21,9 +21,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler
 decltype(&PresentDWM) fn_PresentDWM = nullptr;
 decltype(&PresentMultiplaneOverlay) fn_PresentMultiplaneOverlay = nullptr;
 
-// In a debug build, attempting to use an & operator on a non-null pointer
-// causes the system to freeze as the code attempts to display an error message.
-// I'll think of something later :D
 CComPtr<ID3D11Device> g_Device = nullptr;
 CComPtr<ID3D11DeviceContext> g_DeviceContext = nullptr;
 CComPtr<ID3D11RenderTargetView> g_RenderTargetView = nullptr;
@@ -35,16 +32,19 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 		pSwapChain->GetDevice(IID_PPV_ARGS(&g_Device));
 		g_Device->GetImmediateContext(&g_DeviceContext);
 
-		CComPtr<ID3D11Texture2D> RenderTargetTexture = nullptr;
-		pSwapChain->GetBuffer(0, IID_PPV_ARGS(&RenderTargetTexture));
-		g_Device->CreateRenderTargetView(RenderTargetTexture, nullptr, &g_RenderTargetView);
+		CComPtr<ID3D11Texture2D> pRenderTargetTexture = nullptr;
+		pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pRenderTargetTexture));
+		g_Device->CreateRenderTargetView(pRenderTargetTexture, nullptr, &g_RenderTargetView);
 
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(GetDesktopWindow());
 		ImGui_ImplDX11_Init(g_Device, g_DeviceContext);
 	}
 
-	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView, nullptr);
+	// The shit &g_RenderTargetView.p fixes bug when system causes freeze in debug build
+	// Not normally spamming this every frame but idk how fix it
+	// I'll do better later :0
+	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView.p, nullptr);
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -184,7 +184,7 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 		SwapChainDesc.BufferCount = 1;
 	}
 
-	IDXGISwapChainDWMLegacy* pSwapChain = nullptr;
+	CComPtr<IDXGISwapChainDWMLegacy> pSwapChain = nullptr;
 	pFactoryDWM->CreateSwapChain(pDevice, &SwapChainDesc, pOutput, &pSwapChain);
 
 	// Current offsets are supported on Windows 10 - 11

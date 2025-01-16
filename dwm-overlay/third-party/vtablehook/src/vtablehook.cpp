@@ -15,13 +15,6 @@ void protect(void* region, int protection)
     VirtualProtect(mbi.BaseAddress, mbi.RegionSize, protection, &mbi.Protect);
 }
 
-/*
-* instance: pointer to an instance of a class
-* hook: function to overwrite with
-* offset: 0 = method 1, 1 = method 2 etc...
-* return: original function
-*/
-
 void* vtable::hook(void* instance, void* hook, int offset)
 {
     intptr_t vtable = *((intptr_t*)instance);
