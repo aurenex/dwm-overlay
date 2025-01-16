@@ -1,6 +1,3 @@
-// Yooooo hello bro :3
-// HA-HA-HA-HA-HA-HA-HA
-
 #include <Windows.h>
 #include <atlbase.h>
 
@@ -12,7 +9,7 @@
 
 #include "dxgi/undocumented.h"
 
-#include "minhook/include/minhook.h"
+#include "vtablehook/include/vtablehook.h"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_win32.h"
@@ -184,29 +181,15 @@ DWORD WINAPI MainThread(LPVOID lpParameter)
 		SwapChainDesc.BufferCount = 1;
 	}
 
-	uintptr_t** pSwapChain = nullptr;
-	pFactoryDWM->CreateSwapChain(pDevice, &SwapChainDesc, pOutput, (IDXGISwapChainDWMLegacy**)&pSwapChain);
+	IDXGISwapChainDWMLegacy* pSwapChain = nullptr;
+	pFactoryDWM->CreateSwapChain(pDevice, &SwapChainDesc, pOutput, &pSwapChain);
 
 	// Current offsets are supported on Windows 10 - 11
 	// Don't forget to update the offsets for your version
-	const uintptr_t fpPresentDWM = (*pSwapChain)[16];
-	const uintptr_t fpPresentMultiplaneOverlay = (*pSwapChain)[23];
-
-	fn_PresentDWM = reinterpret_cast
-		<decltype(fn_PresentDWM)>(fpPresentDWM);
-
-	fn_PresentMultiplaneOverlay = reinterpret_cast
-		<decltype(fn_PresentMultiplaneOverlay)>(fpPresentMultiplaneOverlay);
-
-	// You can use vtable hook instead of minhook
-	MH_Initialize();
-	MH_CreateHook(reinterpret_cast<void*>(fpPresentDWM),
-		&hk_PresentDWM, reinterpret_cast<void**>(&fn_PresentDWM));
-	MH_CreateHook(reinterpret_cast<void*>(fpPresentMultiplaneOverlay),
-		&hk_PresentMultiplaneOverlay, reinterpret_cast<void**>(&fn_PresentMultiplaneOverlay));
-
-	if (MH_EnableHook(MH_ALL_HOOKS))
-		return EXIT_FAILURE;
+	fn_PresentDWM = reinterpret_cast<decltype(fn_PresentDWM)>
+		(vtablehook_hook(pSwapChain, &hk_PresentDWM, 16));
+	fn_PresentMultiplaneOverlay = reinterpret_cast<decltype(fn_PresentMultiplaneOverlay)>
+		(vtablehook_hook(pSwapChain, &hk_PresentMultiplaneOverlay, 23));
 
 	const HHOOK hMouseHook = SetWindowsHookExW(WH_MOUSE_LL, &LowLevelMouseProc, nullptr, 0);
 	const HHOOK hKeyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, &LowLevelKeyboardProc, nullptr, 0);
@@ -238,7 +221,8 @@ BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID lpReserved)
 	break;
 
 	case DLL_PROCESS_DETACH:
-		MH_Uninitialize();
+		// TODO: Remove vtable hook
+		break;
 	}
 
 	return TRUE;
