@@ -14,7 +14,7 @@ Subscribe to my Telegram [channel][tg-channel-link] or make a donation if you wa
 - The overlay disappears after reconnecting the monitor.
 
 ### Compilation
-- Clone this repository.
+- Clone or [download][repo-download-link] this repository.
 - Open the **dwm-overlay** solution file in [Visual Studio IDE][vs-download-link].
 - Select the target platform.
 - Press `ctrl + shift + b` to compile.
@@ -26,6 +26,7 @@ Subscribe to my Telegram [channel][tg-channel-link] or make a donation if you wa
 
 Before use, we strongly recommend that you read the [license][license-link].
 
+[repo-download-link]: <https://github.com/aurenex/dwm-overlay/archive/refs/heads/master.zip>
 [vs-download-link]: <https://visualstudio.microsoft.com/downloads/>
 [tg-channel-link]: <https://t.me/aurenex>
-[license-link]: <../master/license.md>
+[license-link]: <../master/license.txt>
