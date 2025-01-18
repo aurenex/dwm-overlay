@@ -10,8 +10,8 @@ Sorry for the shitty code, I'll do better later.
 Subscribe to my Telegram [channel][tg-channel-link] or make a donation if you want to support me.
 
 ### Bugs
-- Debug version causes system to freeze.
 - Duplicating an overlay in an area that is not updating.
+- The overlay disappears after reconnecting the monitor.
 
 ### Compilation
 - Clone this repository.

@@ -41,9 +41,9 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 		ImGui_ImplDX11_Init(g_Device, g_DeviceContext);
 	}
 
-	// The shit &g_RenderTargetView.p fixes bug when system causes freeze in debug build
-	// It's not normal to spam this in every frame but idk how fix it
-	// I'll do better later :0
+	// Using &g_RenderTargetView.p avoids the overridden & operator.
+	// The '&' operator has a null check and if false it prints an error message.
+	// Displaying any message on the main rendering thread causes a deadlock.
 	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView.p, nullptr);
 
 	ImGui_ImplDX11_NewFrame();
