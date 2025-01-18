@@ -32,19 +32,22 @@ void draw(IDXGISwapChainDWMLegacy* pSwapChain)
 		pSwapChain->GetDevice(IID_PPV_ARGS(&g_Device));
 		g_Device->GetImmediateContext(&g_DeviceContext);
 
-		CComPtr<ID3D11Texture2D> pRenderTargetTexture = nullptr;
-		pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pRenderTargetTexture));
-		g_Device->CreateRenderTargetView(pRenderTargetTexture, nullptr, &g_RenderTargetView);
-
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(GetDesktopWindow());
 		ImGui_ImplDX11_Init(g_Device, g_DeviceContext);
+
+		CComPtr<ID3D11Texture2D> pRenderTargetTexture = nullptr;
+		pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pRenderTargetTexture));
+		g_Device->CreateRenderTargetView(pRenderTargetTexture, nullptr, &g_RenderTargetView);
 	}
 
 	// Using &g_RenderTargetView.p avoids the overridden & operator.
 	// The '&' operator has a null check and if false it prints an error message.
 	// Displaying any message on the main rendering thread causes a deadlock.
 	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView.p, nullptr);
+
+	// constexpr float clear_color[]{ 1.0f, 1.0f, 1.0f, 1.0f };
+	// g_DeviceContext->ClearRenderTargetView(g_RenderTargetView.p, clear_color);
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -69,7 +72,7 @@ HRESULT STDMETHODCALLTYPE hk_PresentDWM
 	UINT ScrollRectsCount,
 	const RECT* pScrollRects,
 	IDXGIResource* pResource,
-	UINT FrameIndex // I'm not sure about the name of this variable
+	UINT FrameIndex // I'm not sure about the name of this variable.
 )
 {
 	draw(pSwapChain);
@@ -120,6 +123,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 	if (io.WantCaptureKeyboard)
 		return -1;
 
+	// Abnormal termination of the process if something went wrong.
 	if (hookStruct->vkCode == VK_END)
 		TerminateProcess(GetCurrentProcess(), EXIT_SUCCESS);
 

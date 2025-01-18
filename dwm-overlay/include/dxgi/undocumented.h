@@ -39,7 +39,7 @@ HRESULT STDMETHODCALLTYPE PresentDWM
 	UINT ScrollRectsCount,
 	const RECT* pScrollRects,
 	IDXGIResource* pResource,
-	UINT FrameIndex // I'm not sure about the name of this variable
+	UINT FrameIndex // I'm not sure about the name of this variable.
 );
 
 HRESULT STDMETHODCALLTYPE PresentMultiplaneOverlay
