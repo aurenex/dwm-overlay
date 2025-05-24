@@ -115,13 +115,20 @@ HRESULT STDMETHODCALLTYPE hk_PresentMultiplaneOverlay
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	const KBDLLHOOKSTRUCT* hookStruct = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-	const ImGuiIO& io = ImGui::GetIO();
+	
+	// Prevent process crash if ImGui context is not created
+	// Calling ImGui::GetIO() requires a created context
+	// Which is created when the draw function is called
+	if (ImGui::GetCurrentContext())
+	{
+		const ImGuiIO& io = ImGui::GetIO();
 
-	ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), 
-		static_cast<UINT>(wParam), hookStruct->vkCode, hookStruct->scanCode);
+		ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(),
+			static_cast<UINT>(wParam), hookStruct->vkCode, hookStruct->scanCode);
 
-	if (io.WantCaptureKeyboard)
-		return -1;
+		if (io.WantCaptureKeyboard)
+			return -1;
+	}
 
 	// Abnormal termination of the process if something went wrong.
 	if (hookStruct->vkCode == VK_END)
@@ -133,13 +140,20 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	const MSLLHOOKSTRUCT* hookStruct = reinterpret_cast<MSLLHOOKSTRUCT*>(lParam);
-	const ImGuiIO& io = ImGui::GetIO();
 
-	ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), static_cast<UINT>(wParam),
-		hookStruct->flags, MAKELPARAM(hookStruct->pt.x, hookStruct->pt.y));
+	// Prevent process crash if ImGui context is not created
+	// Calling ImGui::GetIO() requires a created context
+	// Which is created when the draw function is called
+	if(ImGui::GetCurrentContext())
+	{
+		const ImGuiIO& io = ImGui::GetIO();
 
-	if (io.WantCaptureMouse and wParam != WM_MOUSEMOVE)
-		return -1;
+		ImGui_ImplWin32_WndProcHandler(GetDesktopWindow(), static_cast<UINT>(wParam),
+			hookStruct->flags, MAKELPARAM(hookStruct->pt.x, hookStruct->pt.y));
+
+		if (io.WantCaptureMouse and wParam != WM_MOUSEMOVE)
+			return -1;
+	}
 
 	return CallNextHookEx(nullptr, nCode, wParam, lParam);
 }
