@@ -13,6 +13,7 @@ Subscribe to my Telegram [channel][tg-channel-link] or make a donation if you wa
 - ~~Debug version causes system to freeze~~.
 - Duplicating an overlay in an area that is not updating.
 - The overlay disappears after reconnecting the monitor.
+- Doesn't work on Win11 24H2+ with NVIDIA graphics cards.
 
 ### Compilation
 - Clone or [download][repo-download-link] this repository.
