@@ -1,4 +1,4 @@
-# dwm-overlay
+# DWM-Overlay
 
 This may be the first DWM overlay project on GitHub that gets a pointer to the IDXGISwapChainDWMLegacy virtual function table without a memory scan, using undocumented GUIDs. By default, this project only works on Windows 10/11. To support older OS versions, you need to update the offsets for the virtual function table.
 
